@@ -22,6 +22,10 @@ function addon:SetSetting(name, value)
         self.NetworkCollector:RestartTimer()
     end
 
+    if name == "fpsCapacity" or name == "fpsInterval" then
+        self.Window:Refresh()
+    end
+
     return true
 end
 
@@ -55,7 +59,12 @@ end
 
 local function HandleCommand(message)
     local command = message:match("^%s*(.-)%s*$")
-    if command == "" or command == "status" or command == "settings" then
+    if command == "" then
+        addon.Window:Toggle()
+        return
+    end
+
+    if command == "status" or command == "settings" then
         PrintStatus()
         return
     end
@@ -71,7 +80,7 @@ local function HandleCommand(message)
         return
     end
 
-    print("FrameNet Graph: /fng status | /fng settings | /fng set <setting> <value>")
+    print("FrameNet Graph: /fng (toggle window) | /fng status | /fng settings | /fng set <setting> <value>")
     print("Settings: fpsInterval, networkInterval, fpsCapacity, networkCapacity")
 end
 
@@ -84,6 +93,10 @@ local function Initialize()
         network = addon.RingBuffer:New(addon.Config:Get("networkCapacity")),
     }
     addon.initialized = true
+
+    addon.FPSCollector.OnSample = function()
+        addon.Window:Refresh()
+    end
 
     SLASH_FRAMENETGRAPH1 = "/fng"
     SlashCmdList.FRAMENETGRAPH = HandleCommand

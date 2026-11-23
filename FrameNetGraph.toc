@@ -7,8 +7,13 @@
 ## X-License: GPL-2.0-or-later
 ## X-Website: https://github.com/FAR747/framenet-graph
 
+Libs/LibStub/LibStub.lua
+Libs/LibGraph-2.0/LibGraph-2.0.lua
+
 Core/Config.lua
 Core/RingBuffer.lua
 Core/FPSCollector.lua
 Core/NetworkCollector.lua
+UI/Graph.lua
+UI/Window.lua
 Core/Init.lua

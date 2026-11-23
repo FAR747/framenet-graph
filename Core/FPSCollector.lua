@@ -8,6 +8,11 @@ function FPSCollector:Collect()
         time = GetTime(),
         value = GetFramerate(),
     })
+
+    -- Consumers can subscribe without coupling collection to the graphical interface.
+    if self.OnSample then
+        self:OnSample()
+    end
 end
 
 function FPSCollector:RestartTimer()
