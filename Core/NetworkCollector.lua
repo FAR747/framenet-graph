@@ -11,6 +11,10 @@ function NetworkCollector:Collect()
         home = home,
         world = world,
     })
+
+    if self.OnSample then
+        self:OnSample()
+    end
 end
 
 function NetworkCollector:RestartTimer()

@@ -5,7 +5,6 @@ Graph.__index = Graph
 addon.Graph = Graph
 
 local GraphLibrary = LibStub("LibGraph-2.0")
-local FPS_COLOR = { 0.3, 0.85, 0.55, 1 }
 
 local function FormatAxisLabel(label)
     local value = tonumber(label:GetText())
@@ -22,7 +21,7 @@ local function FormatAxisLabel(label)
     label:SetText(text)
 end
 
-function Graph:Create(parent)
+function Graph:Create(parent, series, waitingText)
     local frame = GraphLibrary:CreateGraphLine(nil, parent, "TOPLEFT", "TOPLEFT", 0, 0, 548, 230)
     frame:SetAutoScale(false)
     frame:SetYLabels(true, false)
@@ -36,7 +35,12 @@ function Graph:Create(parent)
     local placeholder = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     placeholder:SetPoint("CENTER")
 
-    return setmetatable({ frame = frame, placeholder = placeholder }, self)
+    return setmetatable({
+        frame = frame,
+        placeholder = placeholder,
+        series = series,
+        waitingText = waitingText,
+    }, self)
 end
 
 function Graph:Update(buffer, interval)
@@ -46,17 +50,23 @@ function Graph:Update(buffer, interval)
 
     local count = buffer:GetCount()
     local latest = buffer:Get(count)
-    local points = {}
+    local dataSeries = {}
+    for seriesIndex = 1, #self.series do
+        dataSeries[seriesIndex] = {}
+    end
     local maximum = 0
 
     -- Copy in chronological order. LibGraph retains this snapshot by reference.
     for index = 1, count do
         local sample = buffer:Get(index)
-        points[index] = { sample.time - latest.time, sample.value }
-        maximum = math.max(maximum, sample.value)
+        for seriesIndex, series in ipairs(self.series) do
+            local value = sample[series.key]
+            dataSeries[seriesIndex][index] = { sample.time - latest.time, value }
+            maximum = math.max(maximum, value)
+        end
     end
 
-    -- Explicit non-zero ranges also handle empty histories, one point, and constant FPS.
+    -- All series share non-zero ranges, including empty, single-point, and constant histories.
     local timeRange = interval
     if count > 1 then
         timeRange = math.max(interval, latest.time - buffer:Get(1).time)
@@ -69,13 +79,15 @@ function Graph:Update(buffer, interval)
     frame:SetYAxis(0, upperBound)
     frame:SetGridSpacing(timeRange / 4, upperBound / 4)
     if count > 0 then
-        frame:AddDataSeries(points, FPS_COLOR, false)
+        for seriesIndex, series in ipairs(self.series) do
+            frame:AddDataSeries(dataSeries[seriesIndex], series.color, false)
+        end
     end
     frame:RefreshGraph()
     frame.NeedsUpdate = false
 
     if count < 2 then
-        self.placeholder:SetText("Waiting for FPS samples...")
+        self.placeholder:SetText(self.waitingText)
         self.placeholder:Show()
     else
         self.placeholder:Hide()

@@ -4,7 +4,7 @@ A lightweight World of Warcraft addon for FPS and Home/World network latency his
 
 Repository: [FAR747/framenet-graph](https://github.com/FAR747/framenet-graph).
 
-Status: core data collection and the first FPS graph implemented. The network graph and remaining UI features are planned.
+Status: core data collection and FPS/network graphs implemented. Remaining UI features are planned.
 
 ## Project layout
 
@@ -31,22 +31,25 @@ Empty directories contain `.gitkeep` placeholders until implementation files are
 - Development version: 0.1.0.
 - Declared client interfaces: Retail `120105` and Forever `16001`.
 - `Core/Init.lua` initializes `FrameNetGraphDB` and separate in-memory buffers after the addon's `ADDON_LOADED` event.
-- `/fng` opens or hides the movable FPS window. Drag its title bar to move it; close it with the close button or Escape.
+- `/fng` opens or hides the movable monitoring window. Drag its title bar to move it; close it with the close button or Escape.
 - `/fng status` and `/fng settings` show intervals and buffer counts/capacities.
 - Status also shows the latest FPS, Home/World latency, and each measurement's age.
 - `/fng set <setting> <value>` changes a setting immediately, without `/reload`.
 - Capacity changes retain the newest samples. The two histories remain independent.
 - Saved settings survive `/reload`; sample history does not. Invalid saved settings revert to their defaults.
 
-The FPS graph uses embedded LibGraph-2.0 Revived v2.0.9. It displays the retained history
-with actual sample timestamps and a Y range adjusted to the data. Its X axis shows
+Both graphs use embedded LibGraph-2.0 Revived v2.0.9 and the same renderer. Network
+latency appears above FPS, with blue Home and orange World series and a matching legend.
+Both network series share a Y scale in milliseconds. Each graph displays its own retained
+history with actual sample timestamps and a Y range adjusted to its data. Its X axis shows
 seconds relative to the latest displayed sample (0). Empty or single-sample histories
 show a waiting message until a line can be drawn. The window starts hidden after `/reload`.
 
-Graph updates happen on new FPS samples, FPS setting changes, and window opening.
+Each graph updates independently on its collector's samples and setting changes.
+Opening the window refreshes both graphs.
 While hidden, the window does not redraw or receive new graph snapshots; collection
 continues in the ring buffers. Reopening shows the current retained history. Window
-resizing, position persistence, network graphs, and Min/Avg/Max are not implemented yet.
+resizing, position persistence, and Min/Avg/Max are not implemented yet.
 
 See [third-party components](DOCS/ThirdParty.md) for the source, version, and original
 licensing notices. No standalone LibGraph, Ace3, or VersionCheck installation is required.
@@ -74,8 +77,8 @@ does not force the client to perform a fresh latency measurement.
 
 The installed client manifests were inspected during development: Retail `12.1.5.70961`
 and Forever `1.60.1.71037`. The user confirmed loading, setting changes, and configuration
-persistence across `/reload`, and live collection in Forever. The new FPS window still
-requires in-game verification. Retail has not been tested.
+persistence across `/reload`, live collection, and the FPS graph in Forever. The new
+network graph still requires in-game verification. Retail has not been tested.
 
 ## Initial scope
 
@@ -118,7 +121,9 @@ in those runtime directories. Existing matching files are overwritten; stale fil
 
 After the first deployment, restart the client if it was already running so that WoW discovers
 the new addon. Enable FrameNet Graph in the AddOns list, enter the world, and run `/fng`
-to open the FPS window. Run `/fng status` for the collection state, history counts,
+to open the monitoring window. The network graph needs two samples to draw its lines;
+at the default interval, wait at least 30 seconds after entering the world.
+Run `/fng status` for the collection state, history counts,
 and latest measurements. Repeat `/fng status` after a sampling interval to check
 that history grows. `/reload` starts a new history with the saved settings.
 For later changes to existing Lua files, deploy again and use `/reload` in game.

@@ -23,7 +23,9 @@ function addon:SetSetting(name, value)
     end
 
     if name == "fpsCapacity" or name == "fpsInterval" then
-        self.Window:Refresh()
+        self.Window:RefreshFPS()
+    elseif name == "networkCapacity" or name == "networkInterval" then
+        self.Window:RefreshNetwork()
     end
 
     return true
@@ -95,7 +97,10 @@ local function Initialize()
     addon.initialized = true
 
     addon.FPSCollector.OnSample = function()
-        addon.Window:Refresh()
+        addon.Window:RefreshFPS()
+    end
+    addon.NetworkCollector.OnSample = function()
+        addon.Window:RefreshNetwork()
     end
 
     SLASH_FRAMENETGRAPH1 = "/fng"
