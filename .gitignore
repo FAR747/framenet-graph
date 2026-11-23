@@ -1,0 +1,8 @@
+# Local deployment configuration
+.env
+.env.*
+!.env.example
+
+# Local Visual Studio Code settings
+.vscode/
+*.code-workspace
