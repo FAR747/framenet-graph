@@ -9,4 +9,6 @@
 
 Core/Config.lua
 Core/RingBuffer.lua
+Core/FPSCollector.lua
+Core/NetworkCollector.lua
 Core/Init.lua

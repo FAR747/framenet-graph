@@ -4,7 +4,7 @@ A lightweight World of Warcraft addon for FPS and Home/World network latency his
 
 Repository: [FAR747/framenet-graph](https://github.com/FAR747/framenet-graph).
 
-Status: configuration and ring buffers implemented. Data collection and the monitoring interface are not implemented yet.
+Status: core data collection implemented. The monitoring interface is not implemented yet.
 
 ## Project layout
 
@@ -32,6 +32,7 @@ Empty directories contain `.gitkeep` placeholders until implementation files are
 - Declared client interfaces: Retail `120105` and Forever `16001`.
 - `Core/Init.lua` initializes `FrameNetGraphDB` and separate in-memory buffers after the addon's `ADDON_LOADED` event.
 - `/fng`, `/fng status`, and `/fng settings` show intervals and buffer counts/capacities.
+- Status also shows the latest FPS, Home/World latency, and each measurement's age.
 - `/fng set <setting> <value>` changes a setting immediately, without `/reload`.
 - Capacity changes retain the newest samples. The two histories remain independent.
 - Saved settings survive `/reload`; sample history does not. Invalid saved settings revert to their defaults.
@@ -44,12 +45,23 @@ Empty directories contain `.gitkeep` placeholders until implementation files are
 | `networkCapacity` | 200 | Integers from 2 to 2000 |
 
 For example, `/fng set fpsCapacity 500` immediately resizes the FPS buffer.
-Intervals are stored now; collection timers will be implemented in the next stage.
+
+FPS and network collectors take their first samples on entering the world, including after
+`/reload`, then use independent `C_Timer.NewTicker` timers. Changing an interval restarts
+only its collector's timer; the next sample arrives after the new interval. Setting the
+same interval again does not restart it. Existing samples are retained.
+
+Each sample records the actual `GetTime()` timestamp, so delayed callbacks do not create
+invented measurements. Collection continues across zone transitions, without restarting
+timers or clearing history. No graphical window is required for collection.
+
+Network samples store the Home and World values returned by `GetNetStats()`; polling
+does not force the client to perform a fresh latency measurement.
 
 The installed client manifests were inspected during development: Retail `12.1.5.70961`
 and Forever `1.60.1.71037`. The user confirmed loading, setting changes, and configuration
-persistence across `/reload` in Forever. The latest readability changes still require
-in-game verification. Retail has not been tested.
+persistence across `/reload` in Forever. The collectors still require in-game verification.
+Retail has not been tested.
 
 ## Initial scope
 
@@ -92,7 +104,9 @@ in those runtime directories. Existing matching files are overwritten; stale fil
 
 After the first deployment, restart the client if it was already running so that WoW discovers
 the new addon. Enable FrameNet Graph in the AddOns list, enter the world, and run `/fng`.
-The expected response is `FrameNet Graph: loaded. Data collection is not implemented yet.`
+The expected first line is `FrameNet Graph: collecting.`, followed by history counts
+and the latest measurements. Repeat `/fng status` after a sampling interval to check
+that history grows. `/reload` starts a new history with the saved settings.
 For later changes to existing Lua files, deploy again and use `/reload` in game.
 
 ## License
