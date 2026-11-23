@@ -28,6 +28,8 @@ function addon:SetSetting(name, value)
         self.Window:RefreshNetwork()
     end
 
+    self.Settings:RefreshField(name)
+
     return true
 end
 
@@ -66,7 +68,12 @@ local function HandleCommand(message)
         return
     end
 
-    if command == "status" or command == "settings" then
+    if command == "settings" then
+        addon.Settings:Open()
+        return
+    end
+
+    if command == "status" then
         PrintStatus()
         return
     end
@@ -102,6 +109,8 @@ local function Initialize()
     addon.NetworkCollector.OnSample = function()
         addon.Window:RefreshNetwork()
     end
+
+    addon.Settings:Initialize()
 
     SLASH_FRAMENETGRAPH1 = "/fng"
     SlashCmdList.FRAMENETGRAPH = HandleCommand

@@ -17,4 +17,5 @@ Core/FPSCollector.lua
 Core/NetworkCollector.lua
 UI/Graph.lua
 UI/Window.lua
+UI/Settings.lua
 Core/Init.lua

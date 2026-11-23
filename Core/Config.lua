@@ -88,6 +88,10 @@ function Config:Get(name)
     return self.settings[name]
 end
 
+function Config:GetDefault(name)
+    return rules[name].default
+end
+
 -- Invalid updates leave the current configuration unchanged.
 function Config:Set(name, value)
     local valid, message = Validate(name, value)

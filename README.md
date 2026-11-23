@@ -34,7 +34,8 @@ Empty directories contain `.gitkeep` placeholders until implementation files are
 - `/fng` opens or hides the movable monitoring window. Drag its title bar to move it; close it with the close button or Escape.
 - Drag the bottom-right grip to resize the window. Its minimum size is 640 x 500 UI units (or the screen size if smaller); both graphs share the available height equally.
 - Window size and center-relative position are saved after dragging/resizing, on closing, and on UI logout. They survive `/reload` and game restarts. Reopening clamps the saved geometry to the current screen.
-- `/fng status` and `/fng settings` show intervals and buffer counts/capacities.
+- `/fng status` shows intervals and buffer counts/capacities.
+- `/fng settings` opens Blizzard Settings > AddOns > FrameNet Graph.
 - Status also shows the latest FPS, Home/World latency, and each measurement's age.
 - `/fng set <setting> <value>` changes a setting immediately, without `/reload`.
 - Capacity changes retain the newest samples. The two histories remain independent.
@@ -42,7 +43,7 @@ Empty directories contain `.gitkeep` placeholders until implementation files are
 - Saved settings survive `/reload`; sample history does not. Invalid saved settings revert to their defaults.
 
 Both graphs use embedded LibGraph-2.0 Revived v2.0.9 and the same renderer. Network
-latency appears above FPS, with blue Home and orange World series and a matching legend.
+latency appears above FPS, with blue Home and orange World series. Their statistics use matching colors.
 Both network series share a Y scale in milliseconds. Each graph displays its own retained
 history with actual sample timestamps and a Y range adjusted to its data. Its X axis shows
 seconds relative to the latest displayed sample (0). Empty or single-sample histories
@@ -59,6 +60,20 @@ after new samples, capacity changes, or window opening; overwritten samples are 
 
 See [third-party components](DOCS/ThirdParty.md) for the source, version, and original
 licensing notices. No standalone LibGraph, Ace3, or VersionCheck installation is required.
+
+## Settings interface
+
+The Blizzard Settings page contains four numeric fields: FPS/network sampling intervals
+and FPS/network history capacities. Press Enter or leave a field to apply it immediately;
+Escape restores the current saved value. Invalid values show an error without changing
+the active setting. Fields refresh when the page opens and reflect slash-command updates
+unless that field is being edited.
+
+The page also provides **Open monitoring window** and **Reset collection settings** buttons.
+Reset restores intervals of 1/30 seconds and capacities of 200/200, using the same update
+logic as slash commands. The window's geometry is preserved. Reducing history capacity
+during reset discards the oldest excess samples; it does not clear the retained history.
+The category's native defaults action also resets only collection settings.
 
 | Setting | Default | Accepted values |
 |---|---|---|
@@ -84,7 +99,9 @@ does not force the client to perform a fresh latency measurement.
 The installed client manifests were inspected during development: Retail `12.1.5.70961`
 and Forever `1.60.1.71037`. The user confirmed loading, setting changes, and configuration
 persistence across `/reload`, live collection, and the FPS graph in Forever. The new
-network graph, window resizing, statistics, and geometry persistence still require in-game verification. Retail has not been tested.
+network graph and statistics have been shown in Forever screenshots, and the user reported
+geometry persistence working. The new Settings page still requires in-game verification.
+Retail has not been tested.
 
 ## Initial scope
 

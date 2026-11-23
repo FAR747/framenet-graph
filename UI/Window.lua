@@ -23,15 +23,6 @@ local function CreateSection(parent, title, topOffset, series, waitingText)
     heading:SetPoint("TOPLEFT")
     heading:SetText(title)
 
-    for index, dataSeries in ipairs(series) do
-        if dataSeries.name then
-            local legend = section:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-            legend:SetPoint("TOPRIGHT", -(12 + (#series - index) * 70), 0)
-            legend:SetText(dataSeries.name)
-            legend:SetTextColor(unpack(dataSeries.color))
-        end
-    end
-
     local summary = section:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     summary:SetPoint("TOPLEFT", 0, -20)
 
