@@ -26,7 +26,7 @@ local function CreateSection(parent, title, topOffset, series, waitingText)
     for index, dataSeries in ipairs(series) do
         if dataSeries.name then
             local legend = section:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-            legend:SetPoint("TOPRIGHT", -((#series - index) * 70), 0)
+            legend:SetPoint("TOPRIGHT", -(12 + (#series - index) * 70), 0)
             legend:SetText(dataSeries.name)
             legend:SetTextColor(unpack(dataSeries.color))
         end
@@ -35,16 +35,37 @@ local function CreateSection(parent, title, topOffset, series, waitingText)
     local summary = section:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
     summary:SetPoint("TOPLEFT", 0, -20)
 
+    local statisticsLabels = {}
+    for index, dataSeries in ipairs(series) do
+        local label = section:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+        label:SetPoint("TOPLEFT", 0, -(36 + (index - 1) * 16))
+        label:SetTextColor(unpack(dataSeries.color))
+        statisticsLabels[index] = label
+    end
+
     local graph = addon.Graph:Create(section, series, waitingText)
     graph.frame:ClearAllPoints()
-    graph.frame:SetPoint("TOPLEFT", 40, -52)
-    graph.frame:SetSize(548, 164)
+    graph.frame:SetPoint("TOPLEFT", 40, -84)
+    graph.frame:SetSize(548, 132)
 
     local axisLabel = section:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    axisLabel:SetPoint("BOTTOM", 0, -6)
+    axisLabel:SetPoint("TOP", graph.frame, "BOTTOM", 0, -22)
     axisLabel:SetText("Time before latest sample (seconds)")
 
-    return graph, summary, section
+    return graph, summary, section, statisticsLabels
+end
+
+local function UpdateStatistics(labels, series, buffer, unit)
+    for index, dataSeries in ipairs(series) do
+        local name = dataSeries.name or "FPS"
+        local statistics = addon.Statistics:Calculate(buffer, dataSeries.key)
+        if statistics then
+            labels[index]:SetText(string.format("%s Min/Avg/Max: %.1f / %.1f / %.1f %s",
+                name, statistics.minimum, statistics.average, statistics.maximum, unit))
+        else
+            labels[index]:SetText(name .. " Min/Avg/Max: - / - / - " .. unit)
+        end
+    end
 end
 
 function Window:Create()
@@ -87,14 +108,14 @@ function Window:Create()
     closeButton:SetScript("OnClick", function() frame:Hide() end)
     table.insert(UISpecialFrames, "FrameNetGraphWindow")
 
-    self.networkGraph, self.networkSummary, self.networkSection = CreateSection(frame, "Network latency (ms)", 46,
+    self.networkGraph, self.networkSummary, self.networkSection, self.networkStatistics = CreateSection(frame, "Network latency (ms)", 46,
         NETWORK_SERIES, "Waiting for network samples...")
-    self.fpsGraph, self.fpsSummary, self.fpsSection = CreateSection(frame, "FPS", 310,
+    self.fpsGraph, self.fpsSummary, self.fpsSection, self.fpsStatistics = CreateSection(frame, "FPS", 310,
         FPS_SERIES, "Waiting for FPS samples...")
 
     local resizeGrip = CreateFrame("Button", nil, frame)
     resizeGrip:SetSize(20, 20)
-    resizeGrip:SetPoint("BOTTOMRIGHT", -4, 4)
+    resizeGrip:SetPoint("BOTTOMRIGHT", 0, 0)
     resizeGrip:SetNormalTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Up")
     resizeGrip:SetPushedTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Down")
     resizeGrip:SetHighlightTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Highlight")
@@ -125,7 +146,7 @@ function Window:Layout(width, height)
     self.fpsSection:SetPoint("TOPLEFT", self.frame, "TOPLEFT", 20, -(46 + sectionHeight + 20))
 
     local graphWidth = sectionWidth - 52
-    local graphHeight = sectionHeight - 80
+    local graphHeight = sectionHeight - 112
     self.networkGraph:Resize(graphWidth, graphHeight)
     self.fpsGraph:Resize(graphWidth, graphHeight)
 end
@@ -161,6 +182,7 @@ function Window:RefreshFPS()
     else
         self.fpsSummary:SetText("FPS: waiting for the first sample")
     end
+    UpdateStatistics(self.fpsStatistics, FPS_SERIES, buffer, "FPS")
     self.fpsGraph:Update(buffer, interval)
 end
 
@@ -178,5 +200,6 @@ function Window:RefreshNetwork()
     else
         self.networkSummary:SetText("Network: waiting for the first sample")
     end
+    UpdateStatistics(self.networkStatistics, NETWORK_SERIES, buffer, "ms")
     self.networkGraph:Update(buffer, interval)
 end

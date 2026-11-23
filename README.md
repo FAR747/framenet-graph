@@ -37,6 +37,7 @@ Empty directories contain `.gitkeep` placeholders until implementation files are
 - Status also shows the latest FPS, Home/World latency, and each measurement's age.
 - `/fng set <setting> <value>` changes a setting immediately, without `/reload`.
 - Capacity changes retain the newest samples. The two histories remain independent.
+- Each graph shows Min/Avg/Max for its retained history: FPS, Home latency, and World latency. Averages are arithmetic means of samples, without time weighting; empty histories show `-`.
 - Saved settings survive `/reload`; sample history does not. Invalid saved settings revert to their defaults.
 
 Both graphs use embedded LibGraph-2.0 Revived v2.0.9 and the same renderer. Network
@@ -52,7 +53,8 @@ While hidden, the window does not redraw or receive new graph snapshots; collect
 continues in the ring buffers. Reopening shows the current retained history. Resizing
 redraws both graphs using their existing data snapshots and pooled objects. Window size
 is retained while opening/closing in the same UI session; size/position persistence
-across `/reload` and Min/Avg/Max are not implemented yet.
+across `/reload` are not implemented yet. Statistics update with the corresponding graph
+after new samples, capacity changes, or window opening; overwritten samples are excluded.
 
 See [third-party components](DOCS/ThirdParty.md) for the source, version, and original
 licensing notices. No standalone LibGraph, Ace3, or VersionCheck installation is required.
@@ -81,7 +83,7 @@ does not force the client to perform a fresh latency measurement.
 The installed client manifests were inspected during development: Retail `12.1.5.70961`
 and Forever `1.60.1.71037`. The user confirmed loading, setting changes, and configuration
 persistence across `/reload`, live collection, and the FPS graph in Forever. The new
-network graph and window resizing still require in-game verification. Retail has not been tested.
+network graph, window resizing, and statistics still require in-game verification. Retail has not been tested.
 
 ## Initial scope
 

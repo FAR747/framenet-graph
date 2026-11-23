@@ -12,6 +12,7 @@ Libs/LibGraph-2.0/LibGraph-2.0.lua
 
 Core/Config.lua
 Core/RingBuffer.lua
+Core/Statistics.lua
 Core/FPSCollector.lua
 Core/NetworkCollector.lua
 UI/Graph.lua
