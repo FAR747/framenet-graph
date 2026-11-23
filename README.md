@@ -1,159 +1,158 @@
 # FrameNet Graph
 
-A lightweight World of Warcraft addon for FPS and Home/World network latency history.
+A lightweight World of Warcraft addon that shows FPS and Home/World network latency over time.
 
-Repository: [FAR747/framenet-graph](https://github.com/FAR747/framenet-graph).
+Watch for FPS drops and latency spikes using two graphs, current readings, and Min/Avg/Max
+statistics. Measurements stay local and collection continues while the window is hidden.
 
-Status: core data collection and FPS/network graphs implemented. Remaining UI features are planned.
+By **uFARme**. Built for **WoW Retail** and **WoW Forever**.
 
-## Project layout
+## Features
 
-```text
-framenet-graph/
-|-- Core/          Addon initialization, configuration, ring buffers, and collectors
-|-- UI/            Monitoring window, graphs, settings, and minimap integration
-|-- Libs/          Required third-party runtime libraries and license notices
-|-- DOCS/          Project documentation
-|-- scripts/       Local development and deployment tools
-|-- FrameNetGraph.toc   Addon metadata and runtime file load order
-|-- .env.example   Example local deployment configuration
-|-- .gitattributes
-|-- .gitignore
-|-- LICENSE
-`-- README.md
-```
+- Separate FPS and network graphs with automatic Y-axis scaling.
+- Blue Home and orange World latency lines on a shared scale in milliseconds.
+- Current values and Min/Avg/Max for FPS, Home, and World.
+- Independent sampling intervals and configurable history capacities.
+- A movable, resizable window with saved size and position.
+- Blizzard Settings integration and a draggable minimap button.
+- In-memory history with fixed-capacity ring buffers; settings persist between sessions.
+- Embedded libraries, with no separate addon dependencies to install.
 
-Empty directories contain `.gitkeep` placeholders until implementation files are added.
+## Screenshots
 
-## Current functionality
+### Monitoring window
 
-- Author: uFARme.
-- Development version: 0.1.0.
-- Declared client interfaces: Retail `120105` and Forever `16001`.
-- `Core/Init.lua` initializes `FrameNetGraphDB` and separate in-memory buffers after the addon's `ADDON_LOADED` event.
-- `/fng` opens or hides the movable monitoring window. Drag its title bar to move it; close it with the close button or Escape.
-- Drag the bottom-right grip to resize the window. Its minimum size is 640 x 500 UI units (or the screen size if smaller); both graphs share the available height equally.
-- Window size and center-relative position are saved after dragging/resizing, on closing, and on UI logout. They survive `/reload` and game restarts. Reopening clamps the saved geometry to the current screen.
-- `/fng status` shows intervals and buffer counts/capacities.
-- `/fng settings` opens Blizzard Settings > AddOns > FrameNet Graph.
-- A minimap launcher uses a standard WoW icon: left-click toggles the graphs, right-click opens Settings, and dragging changes its position. Visibility and position survive `/reload` and restarts.
-- Status also shows the latest FPS, Home/World latency, and each measurement's age.
-- `/fng set <setting> <value>` changes a setting immediately, without `/reload`.
-- Capacity changes retain the newest samples. The two histories remain independent.
-- Each graph shows Min/Avg/Max for its retained history: FPS, Home latency, and World latency. Averages are arithmetic means of samples, without time weighting; empty histories show `-`.
-- Saved settings survive `/reload`; sample history does not. Invalid saved settings revert to their defaults.
+![FPS and Home/World latency graphs with current readings and history statistics](DOCS/Screenshots/fng_window.png)
 
-Both graphs use embedded LibGraph-2.0 Revived v2.0.9 and the same renderer. Network
-latency appears above FPS, with blue Home and orange World series. Their statistics use matching colors.
-Both network series share a Y scale in milliseconds. Each graph displays its own retained
-history with actual sample timestamps and a Y range adjusted to its data. Its X axis shows
-seconds relative to the latest displayed sample (0). Empty or single-sample histories
-show a waiting message until a line can be drawn. The window starts hidden after `/reload`.
+Home and World lines overlap when their values are equal.
 
-Each graph updates independently on its collector's samples and setting changes.
-Opening the window refreshes both graphs.
-While hidden, the window does not redraw or receive new graph snapshots; collection
-continues in the ring buffers. Reopening shows the current retained history. Resizing
-redraws both graphs using their existing data snapshots and pooled objects. Invalid saved
-window values fall back to defaults; only geometry is persisted, not visibility or history.
-Statistics update with the corresponding graph
-after new samples, capacity changes, or window opening; overwritten samples are excluded.
+### Settings
 
-See [third-party components](DOCS/ThirdParty.md) for the source, version, and original
-licensing notices. No standalone LibGraph, Ace3, or VersionCheck installation is required.
+![FrameNet Graph settings for sampling intervals, history capacities, and minimap visibility](DOCS/Screenshots/fng_settings.png)
 
-## Settings interface
+The screenshots show example settings; default history capacity is 200 samples per collector.
 
-The Blizzard Settings page contains four numeric fields: FPS/network sampling intervals
-and FPS/network history capacities. Press Enter or leave a field to apply it immediately;
-Escape restores the current saved value. Invalid values show an error without changing
-the active setting. Fields refresh when the page opens and reflect slash-command updates
-unless that field is being edited.
+## Installation
 
-The page also provides a **Show minimap button** checkbox, **Open monitoring window**,
-and **Reset collection settings** buttons. Hiding the launcher leaves `/fng` and
-`/fng settings` available. The LDB launcher can also be used by broker displays.
-Reset restores intervals of 1/30 seconds and capacities of 200/200, using the same update
-logic as slash commands. Window geometry and minimap preferences are preserved. Reducing history capacity
-during reset discards the oldest excess samples; it does not clear the retained history.
-The category's native defaults action also resets only collection settings.
+Release packaging is being prepared. For now, install from the repository source:
+
+1. Download the repository using **Code > Download ZIP**, or use an existing checkout.
+2. Create a `FrameNetGraph` folder in your client's `Interface/AddOns` directory:
+
+   ```text
+   World of Warcraft/_retail_/Interface/AddOns/FrameNetGraph/
+   World of Warcraft/_forever_/Interface/AddOns/FrameNetGraph/
+   ```
+
+3. Copy `FrameNetGraph.toc`, `LICENSE`, and the complete `Core/`, `UI/`, and `Libs/`
+   directories into that folder. `FrameNetGraph.toc` must be directly inside
+   `Interface/AddOns/FrameNetGraph`, without an extra nested repository folder.
+4. Restart the client if it was running, enable **FrameNet Graph** in the AddOns list,
+   and enter the world.
+5. Type `/fng` or left-click the minimap button to open the graphs.
+
+Repeat the installation for each client you want to use. The network graph needs two
+samples to draw a line, so allow at least 30 seconds at the default interval.
+
+## Usage
+
+| Command | Action |
+|---|---|
+| `/fng` | Open or hide the monitoring window |
+| `/fng status` | Print collection state, history counts, latest values, and sample ages |
+| `/fng settings` | Open Blizzard Settings > AddOns > FrameNet Graph |
+| `/fng set <setting> <value>` | Change a collection setting immediately |
+
+Drag the title bar to move the window and the bottom-right grip to resize it.
+Close it with the close button, Escape, or `/fng`. Its size and position are saved;
+it starts hidden after `/reload` or login. Saved geometry is kept within the current screen.
+
+**Minimap button:** left-click toggles the window, right-click opens settings, and dragging
+changes its position. To hide it, turn off **Show minimap button** in settings.
+You can reopen settings with `/fng settings` even when the button is hidden.
+
+## Configuration
 
 | Setting | Default | Accepted values |
 |---|---|---|
-| `fpsInterval` | 1 s | Finite numbers >= 1 |
-| `networkInterval` | 30 s | Finite numbers >= 30 |
-| `fpsCapacity` | 200 | Integers from 2 to 2000 |
-| `networkCapacity` | 200 | Integers from 2 to 2000 |
+| `fpsInterval` | 1 second | Numbers >= 1 second |
+| `networkInterval` | 30 seconds | Numbers >= 30 seconds |
+| `fpsCapacity` | 200 samples | Integers from 2 to 2000 |
+| `networkCapacity` | 200 samples | Integers from 2 to 2000 |
 
-For example, `/fng set fpsCapacity 500` immediately resizes the FPS buffer.
+In Settings, press **Enter** or leave a numeric field to apply it. **Escape** cancels an
+edit. Invalid values leave the active setting unchanged. Decimal sampling intervals are supported.
 
-FPS and network collectors take their first samples on entering the world, including after
-`/reload`, then use independent `C_Timer.NewTicker` timers. Changing an interval restarts
-only its collector's timer; the next sample arrives after the new interval. Setting the
-same interval again does not restart it. Existing samples are retained.
+For example:
 
-Each sample records the actual `GetTime()` timestamp, so delayed callbacks do not create
-invented measurements. Collection continues across zone transitions, without restarting
-timers or clearing history. No graphical window is required for collection.
+```text
+/fng set fpsInterval 2
+/fng set fpsCapacity 500
+/fng set networkCapacity 300
+```
 
-Network samples store the Home and World values returned by `GetNetStats()`; polling
-does not force the client to perform a fresh latency measurement.
+Changing an interval restarts only the corresponding timer. Changing a capacity retains
+the newest samples that fit. **Reset collection settings** restores the four defaults
+above while preserving the window's geometry and minimap preferences. Reducing a buffer
+during reset discards excess older samples.
 
-The installed client manifests were inspected during development: Retail `12.1.5.70961`
-and Forever `1.60.1.71037`. The user confirmed loading, setting changes, and configuration
-persistence across `/reload`, live collection, and the FPS graph in Forever. The new
-network graph and statistics have been shown in Forever screenshots, and the user reported
-geometry persistence working. The Settings page and minimap launcher still require in-game verification.
-Retail has not been tested.
+## Reading the graphs
 
-## Initial scope
+- Each graph has its own time range. The X axis shows seconds before its latest sample,
+  with 0 at the right edge. Points use actual timestamps, including timer delays.
+- Min/Avg/Max describe the samples currently retained in that collector's history.
+  The average is arithmetic across samples, without time weighting.
+- At the default intervals, 200 samples cover roughly 3 minutes 20 seconds of FPS history and
+  100 minutes of network history. Longer intervals increase the covered time.
+- Identical Home and World values produce overlapping lines. Repeated latency values
+  can also reflect the client's internal measurement refresh; sampling does not force
+  a fresh network measurement.
+- History starts over after `/reload` or a new login. Settings, window geometry, and
+  minimap position/visibility are saved. Hiding the window does not clear history.
 
-- Target the current stable Retail and Forever clients, with initial in-game verification on Forever.
-- Collect FPS and network latency independently, including while the monitoring window is hidden.
-- Use separate ring buffers with configurable capacities, defaulting to 200 samples each.
-- Persist configuration through SavedVariables; keep measurement history in memory only.
-- Implement the core before graphs, settings UI, and minimap integration.
+FrameNet Graph monitors performance; it does not change graphics settings or network behavior.
 
-## Local deployment configuration
+## Compatibility
 
-`scripts/dev.ps1` reads a local `.env` file. Copy `.env.example` to `.env`
-when preparing a new checkout. `.env` is ignored by Git.
+In-game use has been reported on both clients:
 
-| Variable | Purpose | Initial value |
+| Client | Client build recorded during development | Interface |
 |---|---|---|
-| `WOW_PATH` | World of Warcraft installation directory | `M:\BattleNet\World of Warcraft` |
-| `WOW_CLIENT` | Client directory inside the installation | `_forever_` |
+| Retail / Midnight | 12.1.5.70961 | 120105 |
+| Forever | 1.60.1.71037 | 16001 |
 
-The intended addon destination is `<WOW_PATH>\<WOW_CLIENT>\Interface\AddOns\FrameNetGraph`.
-Only runtime files and required dependencies will be deployed. Development files stay in this repository.
+Graph display and collection were confirmed in both clients. The minimap launcher and
+window geometry persistence were also confirmed in Forever.
+Compatibility with MinimapButtonButton (MBB) has not been verified yet.
 
-Run from the repository root in PowerShell:
+## Development
+
+Source layout: `Core/` handles collection, configuration, storage, and statistics;
+`UI/` contains the window, graphs, settings, and launcher; `Libs/` holds embedded dependencies.
+Documentation and screenshots live in `DOCS/`.
+
+For local deployment on Windows:
 
 ```powershell
 Copy-Item .env.example .env
+# Edit WOW_PATH and WOW_CLIENT in .env, then:
 .\scripts\dev.ps1 -WhatIf
 .\scripts\dev.ps1
 ```
 
-Skip the copy command if `.env` already contains your local settings. The script can also
-be launched from another directory; relative `-EnvFile` paths resolve from the repository root.
-Paths with spaces may be unquoted or enclosed in matching single or double quotes in `.env`.
-Only `WOW_PATH` and `WOW_CLIENT` entries and full-line `#` comments are supported.
+Skip the copy if `.env` already contains your local settings. Set `WOW_CLIENT` to
+`_forever_` or `_retail_`. The local `.env` file is ignored by Git. Relative `-EnvFile`
+paths resolve from the repository root, so the script can be launched from another directory.
 
-The selected client's `Interface\AddOns` directory must already exist. The script copies
-`FrameNetGraph.toc`, `LICENSE`, and files under `Core/`, `UI/`, and `Libs/`, excluding
-`.gitkeep` placeholders. Keep only runtime files and required dependency license notices
-in those runtime directories. Existing matching files are overwritten; stale files are not removed.
+The script copies runtime files, embedded libraries, and license notices into the selected
+client. It overwrites matching files without removing stale ones. Documentation, screenshots,
+and development tools are not deployed. Use `/reload` after deploying changes to an existing installation.
 
-After the first deployment, restart the client if it was already running so that WoW discovers
-the new addon. Enable FrameNet Graph in the AddOns list, enter the world, and run `/fng`
-to open the monitoring window. The network graph needs two samples to draw its lines;
-at the default interval, wait at least 30 seconds after entering the world.
-Run `/fng status` for the collection state, history counts,
-and latest measurements. Repeat `/fng status` after a sampling interval to check
-that history grows. `/reload` starts a new history with the saved settings.
-For later changes to existing Lua files, deploy again and use `/reload` in game.
+## Credits and license
 
-## License
+Original FrameNet Graph code is licensed under **GPL-2.0-or-later**. See [LICENSE](LICENSE).
+Third-party components retain their own licensing terms and author notices.
 
-GPL-2.0-or-later. See [LICENSE](LICENSE). Third-party libraries retain their own licenses.
+Thanks to Cryect, Xinhuan, and Pimptasty for **LibGraph-2.0 Revived**, and the authors of
+**LibStub**, **CallbackHandler-1.0**, **LibDataBroker-1.1**, and **LibDBIcon-1.0**.
+Sources, versions, and licensing notes are listed in [Third-party components](DOCS/ThirdParty.md).
