@@ -3,6 +3,26 @@ local _, addon = ...
 local Config = {}
 addon.Config = Config
 
+local windowDefaults = { width = 640, height = 580, x = 0, y = 0 }
+
+local function SanitizeWindowState(saved)
+    if type(saved) ~= "table" then
+        saved = {}
+    end
+
+    local state = {}
+    for key, default in pairs(windowDefaults) do
+        local value = saved[key]
+        local valid = type(value) == "number" and value == value
+            and value > -math.huge and value < math.huge
+        if valid and (key == "width" or key == "height") then
+            valid = value > 0
+        end
+        state[key] = valid and value or default
+    end
+    return state
+end
+
 local rules = {
     fpsInterval = { default = 1, minimum = 1 },
     networkInterval = { default = 30, minimum = 30 },
@@ -51,8 +71,17 @@ function Config:Initialize(saved)
         settings[name] = value
     end
 
+    settings.window = SanitizeWindowState(saved.window)
     self.settings = settings
     return settings
+end
+
+function Config:GetWindowState()
+    return self.settings.window
+end
+
+function Config:SaveWindowState(width, height, x, y)
+    self.settings.window = SanitizeWindowState({ width = width, height = height, x = x, y = y })
 end
 
 function Config:Get(name)

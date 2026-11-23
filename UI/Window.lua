@@ -76,8 +76,8 @@ function Window:Create()
     frame:SetFrameStrata("DIALOG")
     frame:SetMovable(true)
     frame:SetResizable(true)
-    frame:SetResizeBounds(MINIMUM_WIDTH, MINIMUM_HEIGHT)
     frame:SetClampedToScreen(true)
+    frame:SetUserPlaced(false)
     frame:EnableMouse(true)
     frame:SetBackdrop({
         bgFile = "Interface\\Buttons\\WHITE8X8",
@@ -101,7 +101,7 @@ function Window:Create()
     dragArea:EnableMouse(true)
     dragArea:RegisterForDrag("LeftButton")
     dragArea:SetScript("OnDragStart", function() frame:StartMoving() end)
-    dragArea:SetScript("OnDragStop", function() frame:StopMovingOrSizing() end)
+    dragArea:SetScript("OnDragStop", function() self:FinishInteraction() end)
 
     local closeButton = CreateFrame("Button", nil, frame, "UIPanelCloseButton")
     closeButton:SetPoint("TOPRIGHT", -4, -4)
@@ -126,14 +126,54 @@ function Window:Create()
     end)
     resizeGrip:SetScript("OnMouseUp", function(_, button)
         if button == "LeftButton" then
-            frame:StopMovingOrSizing()
+            self:FinishInteraction()
         end
     end)
 
     frame:SetScript("OnSizeChanged", function(_, width, height) self:Layout(width, height) end)
     self:Layout(frame:GetWidth(), frame:GetHeight())
-    frame:SetScript("OnShow", function() self:Refresh() end)
-    frame:SetScript("OnHide", function() frame:StopMovingOrSizing() end)
+    frame:SetScript("OnShow", function()
+        self:RestoreGeometry()
+        self:Refresh()
+    end)
+    frame:SetScript("OnHide", function() self:FinishInteraction() end)
+    frame:RegisterEvent("PLAYER_LOGOUT")
+    frame:SetScript("OnEvent", function() self:FinishInteraction() end)
+end
+
+function Window:RestoreGeometry()
+    local state = addon.Config:GetWindowState()
+    local screenWidth = UIParent:GetWidth()
+    local screenHeight = UIParent:GetHeight()
+    local minimumWidth = math.min(MINIMUM_WIDTH, screenWidth)
+    local minimumHeight = math.min(MINIMUM_HEIGHT, screenHeight)
+    local width = math.min(screenWidth, math.max(minimumWidth, state.width))
+    local height = math.min(screenHeight, math.max(minimumHeight, state.height))
+
+    -- Center-relative offsets use UIParent coordinates and remain independent of drag anchors.
+    local maximumX = (screenWidth - width) / 2
+    local maximumY = (screenHeight - height) / 2
+    local x = math.max(-maximumX, math.min(maximumX, state.x))
+    local y = math.max(-maximumY, math.min(maximumY, state.y))
+
+    self.frame:SetResizeBounds(minimumWidth, minimumHeight, screenWidth, screenHeight)
+    self.frame:SetSize(width, height)
+    self.frame:ClearAllPoints()
+    self.frame:SetPoint("CENTER", UIParent, "CENTER", x, y)
+end
+
+function Window:FinishInteraction()
+    self.frame:StopMovingOrSizing()
+    self.frame:SetUserPlaced(false)
+
+    local centerX, centerY = self.frame:GetCenter()
+    local screenX, screenY = UIParent:GetCenter()
+    if not centerX or not centerY or not screenX or not screenY then
+        return
+    end
+
+    addon.Config:SaveWindowState(self.frame:GetWidth(), self.frame:GetHeight(),
+        centerX - screenX, centerY - screenY)
 end
 
 function Window:Layout(width, height)
