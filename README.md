@@ -36,6 +36,7 @@ Empty directories contain `.gitkeep` placeholders until implementation files are
 - Window size and center-relative position are saved after dragging/resizing, on closing, and on UI logout. They survive `/reload` and game restarts. Reopening clamps the saved geometry to the current screen.
 - `/fng status` shows intervals and buffer counts/capacities.
 - `/fng settings` opens Blizzard Settings > AddOns > FrameNet Graph.
+- A minimap launcher uses a standard WoW icon: left-click toggles the graphs, right-click opens Settings, and dragging changes its position. Visibility and position survive `/reload` and restarts.
 - Status also shows the latest FPS, Home/World latency, and each measurement's age.
 - `/fng set <setting> <value>` changes a setting immediately, without `/reload`.
 - Capacity changes retain the newest samples. The two histories remain independent.
@@ -69,9 +70,11 @@ Escape restores the current saved value. Invalid values show an error without ch
 the active setting. Fields refresh when the page opens and reflect slash-command updates
 unless that field is being edited.
 
-The page also provides **Open monitoring window** and **Reset collection settings** buttons.
+The page also provides a **Show minimap button** checkbox, **Open monitoring window**,
+and **Reset collection settings** buttons. Hiding the launcher leaves `/fng` and
+`/fng settings` available. The LDB launcher can also be used by broker displays.
 Reset restores intervals of 1/30 seconds and capacities of 200/200, using the same update
-logic as slash commands. The window's geometry is preserved. Reducing history capacity
+logic as slash commands. Window geometry and minimap preferences are preserved. Reducing history capacity
 during reset discards the oldest excess samples; it does not clear the retained history.
 The category's native defaults action also resets only collection settings.
 
@@ -100,7 +103,7 @@ The installed client manifests were inspected during development: Retail `12.1.5
 and Forever `1.60.1.71037`. The user confirmed loading, setting changes, and configuration
 persistence across `/reload`, live collection, and the FPS graph in Forever. The new
 network graph and statistics have been shown in Forever screenshots, and the user reported
-geometry persistence working. The new Settings page still requires in-game verification.
+geometry persistence working. The Settings page and minimap launcher still require in-game verification.
 Retail has not been tested.
 
 ## Initial scope

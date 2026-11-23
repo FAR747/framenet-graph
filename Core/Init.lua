@@ -111,6 +111,7 @@ local function Initialize()
     end
 
     addon.Settings:Initialize()
+    addon.Minimap:Initialize()
 
     SLASH_FRAMENETGRAPH1 = "/fng"
     SlashCmdList.FRAMENETGRAPH = HandleCommand

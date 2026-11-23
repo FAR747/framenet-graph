@@ -25,6 +25,7 @@ function SettingsPage:Refresh()
     for _, field in ipairs(fields) do
         self.inputs[field.key]:SetText(tostring(addon.Config:Get(field.key)))
     end
+    self.minimapCheckbox:SetChecked(not addon.Config:GetMinimapState().hide)
     self.errorLabel:SetText("")
 end
 
@@ -62,8 +63,8 @@ function SettingsPage:Initialize()
     description:SetText("Press Enter or leave a field to apply changes. Escape cancels an edit.")
 
     local errorLabel = panel:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-    errorLabel:SetPoint("TOPLEFT", 16, -404)
-    errorLabel:SetPoint("TOPRIGHT", -16, -404)
+    errorLabel:SetPoint("TOPLEFT", 16, -444)
+    errorLabel:SetPoint("TOPRIGHT", -16, -444)
     errorLabel:SetJustifyH("LEFT")
     errorLabel:SetTextColor(1, 0.3, 0.3)
     self.errorLabel = errorLabel
@@ -97,9 +98,21 @@ function SettingsPage:Initialize()
         self.inputs[key] = input
     end
 
+    local minimapCheckbox = CreateFrame("CheckButton", nil, panel, "UICheckButtonTemplate")
+    minimapCheckbox:SetSize(24, 24)
+    minimapCheckbox:SetPoint("TOPLEFT", 12, -350)
+    minimapCheckbox:SetScript("OnClick", function()
+        addon.Minimap:SetVisible(minimapCheckbox:GetChecked())
+    end)
+    self.minimapCheckbox = minimapCheckbox
+
+    local minimapLabel = panel:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    minimapLabel:SetPoint("LEFT", minimapCheckbox, "RIGHT", 6, 0)
+    minimapLabel:SetText("Show minimap button")
+
     local openButton = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
     openButton:SetSize(220, 24)
-    openButton:SetPoint("TOPLEFT", 16, -360)
+    openButton:SetPoint("TOPLEFT", 16, -400)
     openButton:SetText("Open monitoring window")
     openButton:SetScript("OnClick", function()
         if not addon.Window.frame or not addon.Window.frame:IsShown() then

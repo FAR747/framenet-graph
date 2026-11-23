@@ -72,12 +72,22 @@ function Config:Initialize(saved)
     end
 
     settings.window = SanitizeWindowState(saved.window)
+    local minimap = type(saved.minimap) == "table" and saved.minimap or {}
+    local position = minimap.minimapPos
+    if type(position) ~= "number" or position ~= position or position <= -math.huge or position >= math.huge then
+        position = 225
+    end
+    settings.minimap = { hide = minimap.hide == true, minimapPos = position % 360 }
     self.settings = settings
     return settings
 end
 
 function Config:GetWindowState()
     return self.settings.window
+end
+
+function Config:GetMinimapState()
+    return self.settings.minimap
 end
 
 function Config:SaveWindowState(width, height, x, y)
