@@ -30,8 +30,9 @@ foreach ($line in Get-Content -LiteralPath $EnvFile) {
     $key = $Matches[1]
     $value = $Matches[2].Trim()
     if ($value.Length -ge 2) {
-        if (($value.StartsWith('"') -and $value.EndsWith('"')) -or
-            ($value.StartsWith("'") -and $value.EndsWith("'"))) {
+        $hasDoubleQuotes = $value.StartsWith('"') -and $value.EndsWith('"')
+        $hasSingleQuotes = $value.StartsWith("'") -and $value.EndsWith("'")
+        if ($hasDoubleQuotes -or $hasSingleQuotes) {
             $value = $value.Substring(1, $value.Length - 2)
         }
     }
@@ -66,7 +67,8 @@ foreach ($directory in @('Core', 'UI', 'Libs')) {
     $sourceDirectory = Join-Path $projectRoot $directory
     foreach ($file in Get-ChildItem -LiteralPath $sourceDirectory -File -Recurse) {
         if ($file.Name -ne '.gitkeep') {
-            $files += $file.FullName.Substring($projectRoot.Length + 1)
+            $relativePath = $file.FullName.Substring($projectRoot.Length + 1)
+            $files += $relativePath
         }
     }
 }

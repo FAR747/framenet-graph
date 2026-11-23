@@ -4,7 +4,7 @@ A lightweight World of Warcraft addon for FPS and Home/World network latency his
 
 Repository: [FAR747/framenet-graph](https://github.com/FAR747/framenet-graph).
 
-Status: addon loading skeleton. Data collection and the monitoring interface are not implemented yet.
+Status: configuration and ring buffers implemented. Data collection and the monitoring interface are not implemented yet.
 
 ## Project layout
 
@@ -25,16 +25,31 @@ framenet-graph/
 
 Empty directories contain `.gitkeep` placeholders until implementation files are added.
 
-## Loading skeleton
+## Current functionality
 
 - Author: uFARme.
 - Development version: 0.1.0.
 - Declared client interfaces: Retail `120105` and Forever `16001`.
-- `Core/Init.lua` initializes `FrameNetGraphDB` after the addon's `ADDON_LOADED` event.
-- `/fng` confirms that the skeleton has loaded. It does not collect or report measurements yet.
+- `Core/Init.lua` initializes `FrameNetGraphDB` and separate in-memory buffers after the addon's `ADDON_LOADED` event.
+- `/fng`, `/fng status`, and `/fng settings` show intervals and buffer counts/capacities.
+- `/fng set <setting> <value>` changes a setting immediately, without `/reload`.
+- Capacity changes retain the newest samples. The two histories remain independent.
+- Saved settings survive `/reload`; sample history does not. Invalid saved settings revert to their defaults.
+
+| Setting | Default | Accepted values |
+|---|---|---|
+| `fpsInterval` | 1 s | Finite numbers >= 1 |
+| `networkInterval` | 30 s | Finite numbers >= 30 |
+| `fpsCapacity` | 200 | Integers from 2 to 2000 |
+| `networkCapacity` | 200 | Integers from 2 to 2000 |
+
+For example, `/fng set fpsCapacity 500` immediately resizes the FPS buffer.
+Intervals are stored now; collection timers will be implemented in the next stage.
 
 The installed client manifests were inspected during development: Retail `12.1.5.70961`
-and Forever `1.60.1.71037`. In-game loading has not been verified yet.
+and Forever `1.60.1.71037`. The user confirmed loading, setting changes, and configuration
+persistence across `/reload` in Forever. The latest readability changes still require
+in-game verification. Retail has not been tested.
 
 ## Initial scope
 

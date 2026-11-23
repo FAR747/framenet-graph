@@ -7,4 +7,6 @@
 ## X-License: GPL-2.0-or-later
 ## X-Website: https://github.com/FAR747/framenet-graph
 
+Core/Config.lua
+Core/RingBuffer.lua
 Core/Init.lua
