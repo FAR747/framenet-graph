@@ -32,6 +32,7 @@ Empty directories contain `.gitkeep` placeholders until implementation files are
 - Declared client interfaces: Retail `120105` and Forever `16001`.
 - `Core/Init.lua` initializes `FrameNetGraphDB` and separate in-memory buffers after the addon's `ADDON_LOADED` event.
 - `/fng` opens or hides the movable monitoring window. Drag its title bar to move it; close it with the close button or Escape.
+- Drag the bottom-right grip to resize the window. Its minimum size is 640 x 500 UI units; both graphs share the available height equally.
 - `/fng status` and `/fng settings` show intervals and buffer counts/capacities.
 - Status also shows the latest FPS, Home/World latency, and each measurement's age.
 - `/fng set <setting> <value>` changes a setting immediately, without `/reload`.
@@ -48,8 +49,10 @@ show a waiting message until a line can be drawn. The window starts hidden after
 Each graph updates independently on its collector's samples and setting changes.
 Opening the window refreshes both graphs.
 While hidden, the window does not redraw or receive new graph snapshots; collection
-continues in the ring buffers. Reopening shows the current retained history. Window
-resizing, position persistence, and Min/Avg/Max are not implemented yet.
+continues in the ring buffers. Reopening shows the current retained history. Resizing
+redraws both graphs using their existing data snapshots and pooled objects. Window size
+is retained while opening/closing in the same UI session; size/position persistence
+across `/reload` and Min/Avg/Max are not implemented yet.
 
 See [third-party components](DOCS/ThirdParty.md) for the source, version, and original
 licensing notices. No standalone LibGraph, Ace3, or VersionCheck installation is required.
@@ -78,7 +81,7 @@ does not force the client to perform a fresh latency measurement.
 The installed client manifests were inspected during development: Retail `12.1.5.70961`
 and Forever `1.60.1.71037`. The user confirmed loading, setting changes, and configuration
 persistence across `/reload`, live collection, and the FPS graph in Forever. The new
-network graph still requires in-game verification. Retail has not been tested.
+network graph and window resizing still require in-game verification. Retail has not been tested.
 
 ## Initial scope
 

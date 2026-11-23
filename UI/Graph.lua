@@ -43,6 +43,19 @@ function Graph:Create(parent, series, waitingText)
     }, self)
 end
 
+function Graph:Resize(width, height)
+    if self.frame:GetWidth() == width and self.frame:GetHeight() == height then
+        return
+    end
+
+    self.frame:SetSize(width, height)
+    if self.frame:IsVisible() then
+        -- Reuse the current snapshot and pooled textures while resizing.
+        self.frame:RefreshGraph()
+        self.frame.NeedsUpdate = false
+    end
+end
+
 function Graph:Update(buffer, interval)
     if not self.frame:IsVisible() then
         return

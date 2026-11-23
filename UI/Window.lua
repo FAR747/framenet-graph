@@ -3,6 +3,9 @@ local _, addon = ...
 local Window = {}
 addon.Window = Window
 
+local MINIMUM_WIDTH = 640
+local MINIMUM_HEIGHT = 500
+
 local FPS_SERIES = {
     { key = "value", color = { 0.3, 0.85, 0.55, 1 } },
 }
@@ -38,10 +41,10 @@ local function CreateSection(parent, title, topOffset, series, waitingText)
     graph.frame:SetSize(548, 164)
 
     local axisLabel = section:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    axisLabel:SetPoint("TOP", 0, -240)
+    axisLabel:SetPoint("BOTTOM", 0, -6)
     axisLabel:SetText("Time before latest sample (seconds)")
 
-    return graph, summary
+    return graph, summary, section
 end
 
 function Window:Create()
@@ -51,6 +54,8 @@ function Window:Create()
     frame:SetPoint("CENTER")
     frame:SetFrameStrata("DIALOG")
     frame:SetMovable(true)
+    frame:SetResizable(true)
+    frame:SetResizeBounds(MINIMUM_WIDTH, MINIMUM_HEIGHT)
     frame:SetClampedToScreen(true)
     frame:EnableMouse(true)
     frame:SetBackdrop({
@@ -82,13 +87,47 @@ function Window:Create()
     closeButton:SetScript("OnClick", function() frame:Hide() end)
     table.insert(UISpecialFrames, "FrameNetGraphWindow")
 
-    self.networkGraph, self.networkSummary = CreateSection(frame, "Network latency (ms)", 46,
+    self.networkGraph, self.networkSummary, self.networkSection = CreateSection(frame, "Network latency (ms)", 46,
         NETWORK_SERIES, "Waiting for network samples...")
-    self.fpsGraph, self.fpsSummary = CreateSection(frame, "FPS", 310,
+    self.fpsGraph, self.fpsSummary, self.fpsSection = CreateSection(frame, "FPS", 310,
         FPS_SERIES, "Waiting for FPS samples...")
 
+    local resizeGrip = CreateFrame("Button", nil, frame)
+    resizeGrip:SetSize(20, 20)
+    resizeGrip:SetPoint("BOTTOMRIGHT", -4, 4)
+    resizeGrip:SetNormalTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Up")
+    resizeGrip:SetPushedTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Down")
+    resizeGrip:SetHighlightTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Highlight")
+    resizeGrip:SetScript("OnMouseDown", function(_, button)
+        if button == "LeftButton" then
+            frame:StartSizing("BOTTOMRIGHT")
+        end
+    end)
+    resizeGrip:SetScript("OnMouseUp", function(_, button)
+        if button == "LeftButton" then
+            frame:StopMovingOrSizing()
+        end
+    end)
+
+    frame:SetScript("OnSizeChanged", function(_, width, height) self:Layout(width, height) end)
+    self:Layout(frame:GetWidth(), frame:GetHeight())
     frame:SetScript("OnShow", function() self:Refresh() end)
     frame:SetScript("OnHide", function() frame:StopMovingOrSizing() end)
+end
+
+function Window:Layout(width, height)
+    local sectionWidth = width - 40
+    local sectionHeight = (height - 92) / 2
+
+    self.networkSection:SetSize(sectionWidth, sectionHeight)
+    self.fpsSection:SetSize(sectionWidth, sectionHeight)
+    self.fpsSection:ClearAllPoints()
+    self.fpsSection:SetPoint("TOPLEFT", self.frame, "TOPLEFT", 20, -(46 + sectionHeight + 20))
+
+    local graphWidth = sectionWidth - 52
+    local graphHeight = sectionHeight - 80
+    self.networkGraph:Resize(graphWidth, graphHeight)
+    self.fpsGraph:Resize(graphWidth, graphHeight)
 end
 
 function Window:Toggle()
