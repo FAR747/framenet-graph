@@ -52,6 +52,19 @@ def verify_archive(archive_path, version, source_root):
                     raise ValueError(f"Changed runtime texture: {relative_path}")
 
 
+def write_checksum(archive_path):
+    digest = hashlib.sha256()
+    with archive_path.open("rb") as archive:
+        for chunk in iter(lambda: archive.read(1024 * 1024), b""):
+            digest.update(chunk)
+    checksum_path = archive_path.with_name("checksum.txt")
+    line = f"{digest.hexdigest()}  {archive_path.name}\n"
+    checksum_path.write_bytes(line.encode("utf-8"))
+    print("SHA-256 checksum:", flush=True)
+    print(line, end="", flush=True)
+    return checksum_path
+
+
 if __name__ == "__main__":
     release_dir, version = sys.argv[1:]
     archives = list(Path(release_dir).glob("*.zip"))
@@ -59,6 +72,8 @@ if __name__ == "__main__":
         raise SystemExit(f"Expected one addon ZIP, found {len(archives)}")
     verify_archive(archives[0], version, Path(__file__).resolve().parent.parent)
     print(f"Verified {archives[0]}")
+    checksum_path = write_checksum(archives[0])
     if os.environ.get("GITHUB_OUTPUT"):
         with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
             output.write(f"archive={archives[0].resolve().as_posix()}\n")
+            output.write(f"checksum={checksum_path.resolve().as_posix()}\n")

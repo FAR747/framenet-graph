@@ -53,7 +53,7 @@ jobs:
           args: -d -e -l -n "{package-name}-{project-version}"
           pandoc: 'false'
 
-      - name: Verify the archive
+      - name: Verify the archive and generate SHA-256 checksum
         id: archive
         run: python3 scripts/verify-package.py .release "$VERSION"
 
@@ -61,4 +61,5 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           ARCHIVE: ${{ steps.archive.outputs.archive }}
-        run: python3 scripts/draft-release.py "$VERSION" "$ARCHIVE"
+          CHECKSUM: ${{ steps.archive.outputs.checksum }}
+        run: python3 scripts/draft-release.py "$VERSION" "$ARCHIVE" "$CHECKSUM"

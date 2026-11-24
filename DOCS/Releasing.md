@@ -31,7 +31,7 @@ the literal `@project-version@` placeholder until packaged.
 
 ## Re-running
 
-Re-running the same version and commit replaces the ZIP in the existing draft.
+Re-running the same version and commit replaces the ZIP and `checksum.txt` in the existing draft.
 The draft's target must match the selected commit. An existing published release
 or a mismatched tag/draft causes a failure; use a new version for changed code.
 The workflow serializes runs for the same version and does not cancel an upload
@@ -49,6 +49,20 @@ the full runtime manifest, TOC dependencies and version, and binary texture hash
 No remote release is modified if this check fails. `scripts/draft-release.py` checks
 the existing release state again before uploading. A remote permission or upload
 failure can leave a draft that needs to be retried.
+
+After successful verification, `scripts/verify-package.py` creates `.release/checksum.txt`
+containing the ZIP's SHA-256 and filename in `sha256sum` format. The checksum is printed
+in the workflow log, included in the run summary, and attached alongside the ZIP in the
+draft release. It is not placed inside the addon archive.
+
+To verify a download, save both assets in the same directory and run:
+
+```sh
+sha256sum -c checksum.txt
+```
+
+On PowerShell, use `Get-FileHash .\FrameNetGraph-v0.1.0.zip -Algorithm SHA256` and compare
+the result with the hash in `checksum.txt` (substitute the actual ZIP filename).
 
 Local validation cannot replace the first actual Actions run and installation of
 its ZIP. Do not publish until those checks pass.
