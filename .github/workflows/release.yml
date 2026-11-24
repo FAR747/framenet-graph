@@ -1,0 +1,64 @@
+name: Build draft release
+run-name: Draft ${{ inputs.version }} from ${{ github.ref_name }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release tag, e.g. v0.1.0 or v0.2.0-beta.1"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: draft-release-${{ inputs.version }}
+  cancel-in-progress: false
+
+jobs:
+  package:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      VERSION: ${{ inputs.version }}
+    steps:
+      - name: Check out the selected commit and history
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Validate version and prepare a local packaging tag
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ ! "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9]+([.-][a-zA-Z0-9]+)*)?$ ]]; then
+            echo "Expected a version such as v0.1.0 or v0.2.0-beta.1" >&2
+            exit 1
+          fi
+          if git show-ref --verify --quiet "refs/tags/$VERSION"; then
+            if [[ "$(git rev-parse "refs/tags/$VERSION^{commit}")" != "$(git rev-parse HEAD)" ]]; then
+              echo "This tag already points to a different commit." >&2
+              exit 1
+            fi
+          else
+            git -c user.name=github-actions[bot] -c user.email=41898282+github-actions[bot]@users.noreply.github.com \
+              tag --annotate "$VERSION" --message "$VERSION"
+          fi
+
+      - name: Build the addon ZIP without uploading
+        uses: BigWigsMods/packager@v2
+        with:
+          args: -d -e -l -n "{package-name}-{project-version}"
+          pandoc: 'false'
+
+      - name: Verify the archive
+        id: archive
+        run: python3 scripts/verify-package.py .release "$VERSION"
+
+      - name: Create or update the draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ARCHIVE: ${{ steps.archive.outputs.archive }}
+        run: python3 scripts/draft-release.py "$VERSION" "$ARCHIVE"

@@ -1,0 +1,19 @@
+package-as: FrameNetGraph
+enable-nolib-creation: no
+enable-toc-creation: no
+
+ignore:
+  - .github
+  - .vscode
+  - .gitignore
+  - .gitattributes
+  - .pkgmeta
+  - .env
+  - .env.example
+  - .env.*
+  - .release
+  - AGENTS.md
+  - DOCS
+  - README.md
+  - scripts
+  - tests

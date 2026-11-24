@@ -34,7 +34,12 @@ The screenshots show example settings; default history capacity is 200 samples p
 
 ## Installation
 
-Release packaging is being prepared. For now, install from the repository source:
+When a packaged version is published, download its addon ZIP from
+[GitHub Releases](https://github.com/FAR747/framenet-graph/releases) and extract the
+`FrameNetGraph` folder into your client's `Interface/AddOns` directory. Use the
+attached addon ZIP rather than GitHub's automatic **Source code** archives.
+
+Until a packaged release is available, install from the repository source:
 
 1. Download the repository using **Code > Download ZIP**, or use an existing checkout.
 2. Create a `FrameNetGraph` folder in your client's `Interface/AddOns` directory:
@@ -123,7 +128,7 @@ In-game use has been reported on both clients:
 
 Graph display and collection were confirmed in both clients. The minimap launcher and
 window geometry persistence were also confirmed in Forever.
-Compatibility with MinimapButtonButton (MBB) has not been verified yet.
+Compatibility with MinimapButtonButton (MBB) has been confirmed in-game.
 
 ## Development
 
@@ -147,6 +152,13 @@ paths resolve from the repository root, so the script can be launched from anoth
 The script copies runtime files, embedded libraries, and license notices into the selected
 client. It overwrites matching files without removing stale ones. Documentation, screenshots,
 and development tools are not deployed. Use `/reload` after deploying changes to an existing installation.
+
+## Releasing
+
+Use **Actions > Build draft release > Run workflow** with a version such as `v0.1.0`.
+The workflow builds and verifies the addon ZIP, then creates or updates a draft release
+for the selected commit. Review and test the ZIP before publishing manually.
+See [release instructions](DOCS/Releasing.md) for setup, retries, and package contents.
 
 ## Credits and license
 

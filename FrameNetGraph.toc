@@ -1,7 +1,7 @@
 ## Interface: 120105, 16001
 ## Title: FrameNet Graph
 ## Author: uFARme
-## Version: 0.1.0
+## Version: @project-version@
 ## Notes: Lightweight FPS and network latency monitor.
 ## IconTexture: Interface\AddOns\FrameNetGraph\Media\Icon
 ## SavedVariables: FrameNetGraphDB
