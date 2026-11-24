@@ -63,7 +63,7 @@ $destination = Join-Path $addonsPath 'FrameNetGraph'
 
 # Explicit runtime roots keep configuration and development tools out of the game.
 $files = @('FrameNetGraph.toc', 'LICENSE')
-foreach ($directory in @('Core', 'UI', 'Libs')) {
+foreach ($directory in @('Core', 'UI', 'Libs', 'Media')) {
     $sourceDirectory = Join-Path $projectRoot $directory
     foreach ($file in Get-ChildItem -LiteralPath $sourceDirectory -File -Recurse) {
         if ($file.Name -ne '.gitkeep') {

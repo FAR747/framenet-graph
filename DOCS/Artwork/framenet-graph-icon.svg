@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" fill="none" role="img" aria-labelledby="title description">
+  <title id="title">FrameNet Graph</title>
+  <desc id="description">A gold-framed monitor with green and blue graph lines. Transparent background.</desc>
+  <g id="monitor-stand" fill="#916B27">
+    <rect id="stand-neck" x="116" y="184" width="24" height="32" rx="4"/>
+    <rect id="stand-foot" x="84" y="208" width="88" height="12" rx="6"/>
+  </g>
+  <rect id="monitor-frame" x="20" y="36" width="216" height="156" rx="24" fill="#0C121B" stroke="#916B27" stroke-width="12"/>
+  <path id="performance-graph" d="M 50,136 H 78 L 104,92 H 128 L 152,120 H 206" stroke="#4DDB91" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+  <path id="network-graph" d="M 50,162 H 112 L 136,144 H 160 L 180,156 H 206" stroke="#4DADFF" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

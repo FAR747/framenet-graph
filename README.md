@@ -44,7 +44,7 @@ Release packaging is being prepared. For now, install from the repository source
    World of Warcraft/_forever_/Interface/AddOns/FrameNetGraph/
    ```
 
-3. Copy `FrameNetGraph.toc`, `LICENSE`, and the complete `Core/`, `UI/`, and `Libs/`
+3. Copy `FrameNetGraph.toc`, `LICENSE`, and the complete `Core/`, `UI/`, `Libs/`, and `Media/`
    directories into that folder. `FrameNetGraph.toc` must be directly inside
    `Interface/AddOns/FrameNetGraph`, without an extra nested repository folder.
 4. Restart the client if it was running, enable **FrameNet Graph** in the AddOns list,
@@ -129,7 +129,7 @@ Compatibility with MinimapButtonButton (MBB) has not been verified yet.
 
 Source layout: `Core/` handles collection, configuration, storage, and statistics;
 `UI/` contains the window, graphs, settings, and launcher; `Libs/` holds embedded dependencies.
-Documentation and screenshots live in `DOCS/`.
+Runtime artwork lives in `Media/`. Documentation, artwork sources, and screenshots live in `DOCS/`.
 
 For local deployment on Windows:
 

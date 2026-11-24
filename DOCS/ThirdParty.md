@@ -54,5 +54,5 @@ LibDataBroker-1.1:  f3d4758f2060215492c9764b1d7dc2a336826d4cd253cd54ff9ff7c6d78f
 LibDBIcon-1.0:     cafa823dfb9f216eb476af4bcd2fad4c25c718f39b7565fa1c924dbebac41f91
 ```
 
-The launcher references the standard WoW `Interface/Icons/INV_Gizmo_02` texture;
-no Blizzard texture is copied into the repository.
+The launcher and addon-list icon use project artwork supplied by the project owner.
+See [artwork sources](Artwork/README.md).

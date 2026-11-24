@@ -3,6 +3,7 @@
 ## Author: uFARme
 ## Version: 0.1.0
 ## Notes: Lightweight FPS and network latency monitor.
+## IconTexture: Interface\AddOns\FrameNetGraph\Media\Icon
 ## SavedVariables: FrameNetGraphDB
 ## X-License: GPL-2.0-or-later
 ## X-Website: https://github.com/FAR747/framenet-graph

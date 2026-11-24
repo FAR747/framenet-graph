@@ -1,4 +1,4 @@
-local _, addon = ...
+local addonName, addon = ...
 
 local MinimapLauncher = {}
 addon.Minimap = MinimapLauncher
@@ -16,7 +16,7 @@ function MinimapLauncher:Initialize()
         type = "launcher",
         label = "FrameNet Graph",
         text = "FrameNet Graph",
-        icon = "Interface\\Icons\\INV_Gizmo_02",
+        icon = "Interface\\AddOns\\" .. addonName .. "\\Media\\Icon",
         OnClick = function(_, button)
             if button == "LeftButton" then
                 addon.Window:Toggle()
